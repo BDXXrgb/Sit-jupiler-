@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<body style="background:#f2f2f2; font-family:Arial;">
+    {% if annonce %}
+    <div style="background:yellow; padding:15px; border:2px solid red;">
+        <h3>Annonce :</h3> {{ annonce }}
+        <form action="/admin_action/clear_annonce" method="POST"><button>Fermer</button></form>
+    </div>
+    {% endif %}
+
+    <h1>🍺 Solde : {{ joueurs[user].jetons }} Jupis</h1>
+    {% if joueurs[user].avert %}<p style="color:red;">⚠️ {{ joueurs[user].avert }}</p>{% endif %}
+
+    <button onclick="document.getElementById('mes-mises').style.display='block'">Mes Mises</button>
+    <div id="mes-mises" style="display:none; background:white; padding:20px; border:2px solid red; position:fixed; top:20px; right:20px; z-index:999;">
+        <h3>Paris en cours <button onclick="document.getElementById('mes-mises').style.display='none'">X</button></h3>
+        {% for p in paris if p.user == user and p.termine == False %} 
+            <p>{{ p.equipe }} : {{ p.montant }} Jupis</p> 
+        {% else %} <p>Aucune mise active.</p> {% endfor %}
+    </div>
+
+    {% if user == 'BDX' %}
+    <button onclick="document.getElementById('admin-box').style.display='block'" style="background:red; color:white;">⚙️ ADMIN PANEL</button>
+    <div id="admin-box" style="display:none; background:white; padding:20px; border:3px solid red; position:fixed; top:50px; left:50px; z-index:9999;">
+        <h3>Admin <button onclick="document.getElementById('admin-box').style.display='none'">X</button></h3>
+        <form action="/admin_action/annonce" method="POST"><input name="valeur" placeholder="Annonce"><button>Diffuser</button></form>
+        <form action="/admin_action/valider" method="POST"><input name="match_id" placeholder="ID"> <input name="equipe_gagnante" placeholder="Gagnant"><button>Valider</button></form>
+        <form action="/admin_action/jupis" method="POST"><input name="pseudo" placeholder="Pseudo"> <input name="valeur" placeholder="Jupis"><button>Modif Jupis</button></form>
+        <form action="/admin_action/avert" method="POST"><input name="pseudo" placeholder="Pseudo"> <input name="valeur" placeholder="Avert"><button>Avertir</button></form>
+        <form action="/admin_action/ban" method="POST"><input name="pseudo" placeholder="Pseudo"><button>BAN/UNBAN</button></form>
+    </div>
+    {% endif %}
+
+    {% for m in matchs %}
+    <div style="background:white; margin:10px; padding:10px; border-left:5px solid #d40000;">
+        <p style="font-size:0.8em; color:gray;">{{ m.date }} à {{ m.heure }}</p>
+        <strong>{{ m.equipe_a }} vs {{ m.equipe_b }}</strong>
+        {% if joueurs[user].jetons > 0 %}
+        <form action="/miser/{{ m.id }}" method="POST">
+            <select name="equipe"><option>{{ m.equipe_a }}</option><option>{{ m.equipe_b }}</option></select>
+            <input name="montant" type="number" placeholder="Mise">
+            <button>Parier</button>
+        </form>
+        {% else %}
+        <p style="color:red;">⚠️ Plus de Jupis !</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>
